@@ -1,0 +1,10 @@
+{
+  "name": "DOBAR VIDEO",
+  "short_name": "DOBAR VIDEO",
+  "description": "Besplatan studio za uređivanje videa.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101010",
+  "theme_color": "#101010"
+}

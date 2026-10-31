@@ -1,19 +1,37 @@
 
-HTML
 <!DOCTYPE html>
 <html lang="bs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#101010">
-    <meta name="description" content="Besplatan studio za uređivanje videa.">
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="stylesheet" href="style.css">
     <title>DOBAR VIDEO – Studio za sve</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <header>
         <h1>🎬 DOBAR VIDEO</h1>
         <p>Studio za sve – besplatno!</p>
     </header>
+
+    <main>
+        <section>
+            <h2>Izaberi svoj video</h2>
+            <input type="file" id="videoFile" accept="video/*">
+
+            <div id="videoContainer">
+                <video id="video" controls playsinline style="display:none;"></video>
+            </div>
+
+            <h2>Dodaj tekst preko videa</h2>
+            <textarea id="caption" placeholder="Napiši nešto smiješno..."></textarea>
+        </section>
+    </main>
+
+    <footer>
+        <p>Napravljen za sve koji vole stvarati. ❤️</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

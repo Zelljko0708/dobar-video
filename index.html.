@@ -1,39 +1,45 @@
 <!DOCTYPE html>
 <html lang="bs">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#101522">
-<title>DOBAR VIDEO</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101010">
+    <meta name="description" content="Besplatan studio za uređivanje videa.">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="style.css">
+    <title>DOBAR VIDEO – Studio za sve</title>
 </head>
 <body>
-<header>
-<h1>▶ DOBAR VIDEO</h1>
-<p>Studio za sve ❤️</p>
-</header>
 
-<main>
-<h2>Tvoja ideja. Tvoj video.</h2>
-<p>Besplatni studio za stvaranje videa.</p>
+    <header>
+        <h1>🎬 DOBAR VIDEO</h1>
+        <p>Studio za sve – besplatno!</p>
+    </header>
 
-<section>
-<h3>1. Izaberi video</h3>
-<input type="file" id="videoFile" accept="video/*">
-</section>
+    <main>
+        <section>
+            <h2>Izaberi svoj video</h2>
+            <input type="file" id="videoFile" accept="video/*">
 
-<section>
-<h3>2. Pregled videa</h3>
-<video id="video" controls playsinline></video>
-</section>
+            <video id="video" controls playsinline style="display:none;"></video>
 
-<section>
-<h3>3. Dodaj tekst</h3>
-<input type="text" id="caption" placeholder="Napiši nešto smiješno...">
-</section>
-</main>
+            <h2>Dodaj tekst</h2>
+            <textarea id="caption" placeholder="Napiši nešto smiješno..."></textarea>
+            <div id="videoText"></div>
+        </section>
+    </main>
 
-<script src="app.js"></script>
+    <footer>
+        <p>Napravljen za sve koji vole stvarati. ❤️</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("./sw.js");
+            });
+        }
+    </script>
 </body>
 </html>

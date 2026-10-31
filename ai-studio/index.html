@@ -1,1 +1,129 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101522">
+  <title>DOBAR VIDEO – AI Studio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">🎬 DOBAR VIDEO</div>
+    <p>AI STUDIO · Ideja u video, bez komplikovanja</p>
+  </header>
 
+  <main>
+    <section class="panel intro">
+      <span class="eyebrow">TVOJ MALI VIDEO STUDIO</span>
+      <h1>Od jedne ideje do gotovog videa.</h1>
+      <p>Napiši šta želiš. Studio će osmisliti kratku priču, napraviti animirane scene, dodati glas i titlove, pa izvesti video.</p>
+    </section>
+
+    <section class="panel">
+      <label for="idea">1. O čemu da bude video?</label>
+      <textarea id="idea" rows="3" placeholder="Npr. Doktor saopštava pacijentu lošu vijest...">Doktor saopštava pacijentu lošu vijest</textarea>
+
+      <div class="grid">
+        <div>
+          <label for="genre">Vrsta videa</label>
+          <select id="genre">
+            <option value="humor">Humor</option>
+            <option value="balkan">Balkanska svakodnevica</option>
+            <option value="motivacija">Motivacija</option>
+            <option value="price">Kratka priča</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="duration">Trajanje</label>
+          <select id="duration">
+            <option value="20">Oko 20 sekundi</option>
+            <option value="30" selected>Oko 30 sekundi</option>
+            <option value="45">Oko 45 sekundi</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="format">Format</label>
+          <select id="format">
+            <option value="portrait">TikTok / Reels 9:16</option>
+            <option value="square">Kvadrat 1:1</option>
+            <option value="landscape">Široki 16:9</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="voice">Glas</label>
+          <select id="voice">
+            <option value="auto">Automatski glas telefona</option>
+            <option value="male">Dublji glas (ako je dostupan)</option>
+            <option value="female">Viši glas (ako je dostupan)</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="createBtn" class="primary">✨ Napravi moj video</button>
+      <p class="hint">Radi direktno u pregledniku. Za govor koristi glasove koji su već dostupni na telefonu.</p>
+    </section>
+
+    <section class="panel" id="storyPanel" hidden>
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">2. TVOJA PRIČA</span>
+          <h2>Scenarij i scene</h2>
+        </div>
+        <button id="regenerateBtn" class="secondary">↻ Nova verzija</button>
+      </div>
+
+      <label for="title">Naslov videa</label>
+      <input id="title" type="text">
+
+      <label for="script">Tekst / dijalog (možeš urediti)</label>
+      <textarea id="script" rows="6"></textarea>
+
+      <div id="sceneList" class="scene-list"></div>
+    </section>
+
+    <section class="panel" id="previewPanel" hidden>
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">3. PREGLED</span>
+          <h2>Ovako će izgledati video</h2>
+        </div>
+        <span id="status" class="status">Spremno</span>
+      </div>
+
+      <div class="stage-wrap">
+        <canvas id="stage" width="360" height="640"></canvas>
+      </div>
+
+      <div class="controls">
+        <button id="previewBtn" class="secondary">▶ Pregledaj</button>
+        <button id="stopBtn" class="secondary">■ Zaustavi</button>
+        <label class="check"><input id="captions" type="checkbox" checked> Titlovi</label>
+        <label class="check"><input id="voiceOn" type="checkbox" checked> Govor</label>
+        <label class="check"><input id="musicOn" type="checkbox" checked> Pozadinski zvuk</label>
+      </div>
+
+      <button id="exportBtn" class="primary">⬇ Izvezi gotov video</button>
+
+      <div class="progress">
+        <div id="progressBar"></div>
+      </div>
+
+      <p id="exportMessage" class="hint">Video se izvozi u WebM formatu.</p>
+      <a id="download" class="download" hidden>Preuzmi gotov video</a>
+    </section>
+
+    <section class="panel note">
+      <strong>Važno, pošteno objašnjenje:</strong>
+      <p>Ova verzija sama sastavlja scenarij iz ugrađenih obrazaca, crta animirane likove i scene, koristi govor telefona i pravi video. Nije neograničeni generator realističnih AI snimaka: za takve AI modele obično su potrebni vanjski servisi, internet i često plaćeni krediti. Ovdje nema pretplate ni kredita.</p>
+    </section>
+  </main>
+
+  <footer>Napravljen za sve koji imaju ideju. ❤️</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -4,6 +4,7 @@ const caption = document.getElementById("caption");
 const videoText = document.getElementById("videoText");
 const textSize = document.getElementById("textSize");
 const textColor = document.getElementById("textColor");
+const videoContainer = document.getElementById("videoContainer");
 
 videoFile.addEventListener("change", function () {
     const file = this.files[0];
@@ -26,26 +27,39 @@ textSize.addEventListener("input", function () {
 textColor.addEventListener("input", function () {
     videoText.style.color = textColor.value;
 });
+
+// Pomjeranje teksta prstom
 let isDragging = false;
+let offsetX = 0;
+let offsetY = 0;
 
 videoText.addEventListener("pointerdown", function (event) {
+    if (!caption.value) return;
+
     isDragging = true;
+
+    const textRect = videoText.getBoundingClientRect();
+
+    offsetX = event.clientX - textRect.left;
+    offsetY = event.clientY - textRect.top;
+
     videoText.setPointerCapture(event.pointerId);
 });
 
 videoText.addEventListener("pointermove", function (event) {
     if (!isDragging) return;
 
-    const rect = video.getBoundingClientRect();
+    const rect = videoContainer.getBoundingClientRect();
+    const textRect = videoText.getBoundingClientRect();
 
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    let left = event.clientX - rect.left - offsetX;
+    let top = event.clientY - rect.top - offsetY;
 
-    const left = Math.max(0, Math.min(95, (x / rect.width) * 100));
-    const top = Math.max(0, Math.min(95, (y / rect.height) * 100));
+    left = Math.max(0, Math.min(left, rect.width - textRect.width));
+    top = Math.max(0, Math.min(top, rect.height - textRect.height));
 
-    videoText.style.left = left + "%";
-    videoText.style.top = top + "%";
+    videoText.style.left = left + "px";
+    videoText.style.top = top + "px";
     videoText.style.right = "auto";
 });
 

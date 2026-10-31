@@ -1,12 +1,9 @@
 
+
 const videoFile = document.getElementById("videoFile");
 const video = document.getElementById("video");
 const caption = document.getElementById("caption");
-const videoContainer = document.getElementById("videoContainer");
-
-const videoText = document.createElement("div");
-videoText.id = "videoText";
-videoContainer.appendChild(videoText);
+const videoText = document.getElementById("videoText");
 
 videoFile.addEventListener("change", function () {
     const file = this.files[0];

@@ -26,3 +26,33 @@ textSize.addEventListener("input", function () {
 textColor.addEventListener("input", function () {
     videoText.style.color = textColor.value;
 });
+let isDragging = false;
+
+videoText.addEventListener("pointerdown", function (event) {
+    isDragging = true;
+    videoText.setPointerCapture(event.pointerId);
+});
+
+videoText.addEventListener("pointermove", function (event) {
+    if (!isDragging) return;
+
+    const rect = video.getBoundingClientRect();
+
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const left = Math.max(0, Math.min(95, (x / rect.width) * 100));
+    const top = Math.max(0, Math.min(95, (y / rect.height) * 100));
+
+    videoText.style.left = left + "%";
+    videoText.style.top = top + "%";
+    videoText.style.right = "auto";
+});
+
+videoText.addEventListener("pointerup", function () {
+    isDragging = false;
+});
+
+videoText.addEventListener("pointercancel", function () {
+    isDragging = false;
+});

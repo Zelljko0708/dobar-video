@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "dobar-video-v2";
+const CACHE_NAME = "dobar-video-v3";
 
 const FILES = [
     "./",

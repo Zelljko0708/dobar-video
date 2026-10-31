@@ -48,7 +48,7 @@ textarea {
     resize: vertical;
 }
 
-#videoContainer #
+#videoContainer {
     position: relative;
     width: 100%;
     margin-top: 15px;
@@ -63,10 +63,9 @@ video {
 }
 
 #videoText {
-    #videoText {
-    
-    top: 25px !important;
-    bottom: auto !important;
+    position: absolute;
+    top: 25px;
+    bottom: auto;
     left: 5%;
     right: 5%;
     z-index: 10;
@@ -76,11 +75,7 @@ video {
     text-align: center;
     text-shadow: 2px 2px 4px black;
     pointer-events: none;
-    
-}
-    pointer-events: none;
     overflow-wrap: anywhere;
-}
 }
 
 footer {

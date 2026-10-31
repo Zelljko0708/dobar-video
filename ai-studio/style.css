@@ -1,1 +1,163 @@
+* {
+  box-sizing: border-box;
+}
 
+body {
+  margin: 0;
+  padding: 18px;
+  background: #101522;
+  color: #f4f6ff;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+}
+
+h1 {
+  text-align: center;
+  color: #8ea7ff;
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #aab3c8;
+  margin-bottom: 25px;
+}
+
+.panel {
+  background: #1a2233;
+  border: 1px solid #303b52;
+  border-radius: 15px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+label {
+  display: block;
+  margin: 14px 0 7px;
+  font-weight: bold;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 9px;
+  border: 1px solid #46536d;
+  background: #0f1726;
+  color: white;
+  font-size: 16px;
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 13px 18px;
+  margin: 8px 5px 0 0;
+  background: #657fff;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  opacity: 0.5;
+}
+
+button.secondary {
+  background: #35425d;
+}
+
+button.danger {
+  background: #a83e55;
+}
+
+#stage {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 15px auto;
+  background: #202b42;
+  border-radius: 12px;
+  border: 1px solid #46536d;
+}
+
+.scene {
+  padding: 12px;
+  margin: 9px 0;
+  background: #26334b;
+  border-radius: 9px;
+  color: #e6ebff;
+}
+
+.status {
+  color: #9eafff;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.progress {
+  width: 100%;
+  height: 10px;
+  background: #303b52;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+#progressBar {
+  width: 0%;
+  height: 100%;
+  background: #7d96ff;
+  transition: width 0.2s;
+}
+
+a {
+  color: #9eafff;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 12px;
+  }
+
+  h1 {
+    font-size: 23px;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  button {
+    width: 100%;
+    margin: 6px 0;
+  }
+}

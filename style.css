@@ -64,7 +64,7 @@ video {
 
 #videoText {
     #videoText {
-    position: absolute !important;
+    
     top: 25px !important;
     bottom: auto !important;
     left: 5%;
@@ -76,7 +76,7 @@ video {
     text-align: center;
     text-shadow: 2px 2px 4px black;
     pointer-events: none;
-    overflow-wrap: anywhere;
+    
 }
     pointer-events: none;
     overflow-wrap: anywhere;

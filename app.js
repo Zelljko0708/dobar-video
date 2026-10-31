@@ -3,6 +3,7 @@ const video = document.getElementById("video");
 const caption = document.getElementById("caption");
 const videoText = document.getElementById("videoText");
 const textSize = document.getElementById("textSize");
+const textColor = document.getElementById("textColor");
 
 videoFile.addEventListener("change", function () {
     const file = this.files[0];
@@ -20,4 +21,8 @@ caption.addEventListener("input", function () {
 
 textSize.addEventListener("input", function () {
     videoText.style.fontSize = textSize.value + "px";
+});
+
+textColor.addEventListener("input", function () {
+    videoText.style.color = textColor.value;
 });

@@ -5,7 +5,9 @@ const videoText = document.getElementById("videoText");
 const textSize = document.getElementById("textSize");
 const textColor = document.getElementById("textColor");
 const videoContainer = document.getElementById("videoContainer");
+const resetText = document.getElementById("resetText");
 
+// Učitavanje videa
 videoFile.addEventListener("change", function () {
     const file = this.files[0];
 
@@ -16,14 +18,17 @@ videoFile.addEventListener("change", function () {
     }
 });
 
+// Dodavanje teksta
 caption.addEventListener("input", function () {
     videoText.textContent = caption.value;
 });
 
+// Promjena veličine teksta
 textSize.addEventListener("input", function () {
     videoText.style.fontSize = textSize.value + "px";
 });
 
+// Promjena boje teksta
 textColor.addEventListener("input", function () {
     videoText.style.color = textColor.value;
 });
@@ -69,4 +74,11 @@ videoText.addEventListener("pointerup", function () {
 
 videoText.addEventListener("pointercancel", function () {
     isDragging = false;
+});
+
+// Vraćanje teksta na početni položaj
+resetText.addEventListener("click", function () {
+    videoText.style.left = "5%";
+    videoText.style.right = "5%";
+    videoText.style.top = "25px";
 });

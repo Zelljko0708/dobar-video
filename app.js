@@ -1,5 +1,4 @@
 
-
 const videoFile = document.getElementById("videoFile");
 const video = document.getElementById("video");
 const caption = document.getElementById("caption");

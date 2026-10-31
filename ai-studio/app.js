@@ -180,7 +180,10 @@
         .join("\n\n");
     }
 
-    renderSceneList();
+    renderSceneList();renderSceneList();
+$("storyPanel").hidden = false;
+$("previewPanel").hidden = false;
+drawScene(0);
     drawScene(0);
     setStatus("Video je napravljen! Sada možeš pokrenuti pregled.");
   }

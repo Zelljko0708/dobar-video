@@ -21,7 +21,10 @@
 
             <div id="videoContainer">
                 <video id="video" controls playsinline style="display:none;"></video>
-                <div id="videoText"></div>
+                <div id="videoContainer" style="position:relative; width:100%; overflow:hidden;">
+    <video id="video" controls playsinline style="display:none; width:100%;"></video>
+    <div id="videoText" style="position:absolute; top:25px; left:5%; right:5%; z-index:10; color:white; font-size:26px; font-weight:bold; text-align:center; text-shadow:2px 2px 4px black; pointer-events:none;"></div>
+</div>
             </div>
 
             <h2>Dodaj tekst preko videa</h2>

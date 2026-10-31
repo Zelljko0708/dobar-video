@@ -1,501 +1,541 @@
-const $ = id => document.getElementById(id);
-const canvas = $("stage");
-const ctx = canvas.getContext("2d");
+(() => {
+  "use strict";
 
-let scenes = [];
-let currentScene = 0;
-let playing = false;
-let playTimer = null;
-let generatedTitle = "";
+  const $ = id => document.getElementById(id);
 
-function hashText(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) {
-    h = (h * 31 + s.charCodeAt(i)) | 0;
-  }
-  return Math.abs(h);
-}
-
-function makeStory() {
-  const idea = $("idea").value.trim() || "Jedan neobičan dan";
-  const genre = $("genre").value;
-  const seconds = Number($("duration").value);
-  const seed = hashText(idea);
-  const doctor = /doktor|ljekar|bolnica/i.test(idea);
-
-  generatedTitle = idea.length > 42
-    ? idea.slice(0, 39) + "..."
-    : idea;
-
-  let lines;
-
-  if (genre === "humor" && doctor) {
-    lines = [
-      ["Čekaonica", "Pacijent ulazi kod doktora. Doktor ozbiljno gleda nalaze.", "Doktor", "Danas imam jednu dobru i jednu lošu vijest."],
-      ["Loša vijest", "Pacijent se namršti i nagne naprijed.", "Pacijent", "Dajte prvo lošu, doktore."],
-      ["Obrt", "Doktor skida naočale i uzdahne.", "Doktor", "Ostalo vam je još 24 sata života."],
-      ["Poenta", "Pacijent skoči sa stolice.", "Pacijent", "A koja je onda dobra vijest?!"],
-      ["Završnica", "Doktor pogleda u sat i slegne ramenima.", "Doktor", "Pa... juče sam vas pokušao nazvati!"]
-    ];
-  } else if (genre === "humor") {
-    lines = [
-      ["Početak", "U malom mjestu svi imaju savjet za svakoga.", "Pripovjedač", "Kod nas svaki problem ima stručnjaka."],
-      ["Savjet", "Komšija prilazi kao da ima rješenje za sve.", "Komšija", "Ja ti kažem, samo treba malo pameti."],
-      ["Pitanje", "Drugi ga pogleda potpuno zbunjeno.", "Drugi", "A gdje da je nabavim?"],
-      ["Obrt", "Komšija se zamisli pa odgovori.", "Komšija", "E, to već moraš sam istražiti!"]
-    ];
-  } else if (genre === "balkan") {
-    lines = [
-      ["Jutro", "Počinje još jedan običan dan na Balkanu.", "Pripovjedač", "Plan je bio da danas sve završim na vrijeme."],
-      ["Neočekivano", "Telefon zazvoni baš kad treba krenuti.", "Telefon", "Samo da te pitam nešto, imaš li minut?"],
-      ["Haos", "Minut se pretvori u čitav razgovor.", "Pripovjedač", "Na Balkanu minut traje najmanje pola sata."],
-      ["Kraj", "Sat pokazuje da je dan već odmakao.", "Pripovjedač", "Dobro, sutra počinjem ispočetka."]
-    ];
-  } else if (genre === "motivacija") {
-    lines = [
-      ["Početak", "Svaki veliki korak počinje malom odlukom.", "Pripovjedač", "Ne moraš danas riješiti sve."],
-      ["Korak", "Važno je da ne odustaneš od sebe.", "Pripovjedač", "Uradi jednu malu stvar koja te vodi naprijed."],
-      ["Snaga", "Greške nisu kraj puta.", "Pripovjedač", "Odmori ako moraš, ali nastavi kad budeš spreman."],
-      ["Poruka", "Pogled je usmjeren naprijed.", "Pripovjedač", "Tvoj tempo je tvoj. Samo nastavi."]
-    ];
-  } else {
-    lines = [
-      ["Uvod", "Jedna sasvim obična situacija kreće neočekivanim putem.", "Pripovjedač", idea + "."],
-      ["Susret", "Dva lika zastanu i razmijene pogled.", "Prvi lik", "Nisam očekivao da će se ovo danas desiti."],
-      ["Razgovor", "Drugi lik se nasmije i odgovori.", "Drugi lik", "Ponekad baš takve stvari pamtimo."],
-      ["Završetak", "Scena se smiruje i pojavljuje se završna poruka.", "Pripovjedač", "I tako je nastala priča za pamćenje."]
-    ];
+  const canvas = $("stage");
+  if (!canvas) {
+    alert("Greška: Nije pronađeno platno za video. Provjeri index.html.");
+    return;
   }
 
-  if (seconds === 20) lines = lines.slice(0, 4);
+  const ctx = canvas.getContext("2d");
 
-  if (seconds === 45 && lines.length < 5) {
-    lines.push(["Završna misao", "Kamera se polako udaljava.", "Pripovjedač", "Nastavak slijedi..."]);
+  const idea = $("idea");
+  const genre = $("genre");
+  const duration = $("duration");
+  const scriptBox = $("script");
+  const titleBox = $("title");
+  const sceneList = $("sceneList");
+  const status = $("status");
+  const createBtn = $("createBtn");
+  const previewBtn = $("previewBtn");
+  const stopBtn = $("stopBtn");
+  const exportBtn = $("exportBtn");
+  const progressBar = $("progressBar");
+  const download = $("download");
+
+  let scenes = [];
+  let currentScene = 0;
+  let playing = false;
+  let animationTimer = null;
+  let recorder = null;
+  let recordedChunks = [];
+  let audioContext = null;
+
+  const W = 720;
+  const H = 1280;
+  canvas.width = W;
+  canvas.height = H;
+
+  const examples = {
+    humor: [
+      {
+        speaker: "Mujo",
+        text: "Doktore, imam problem. Svaki put kad popijem kafu, boli me oko!",
+        bg: "#243b55"
+      },
+      {
+        speaker: "Doktor",
+        text: "A jeste li probali izvaditi kašičicu iz šolje?",
+        bg: "#385170"
+      },
+      {
+        speaker: "Mujo",
+        text: "Doktore, vi ste genije! Koliko sam vam dužan?",
+        bg: "#293e56"
+      },
+      {
+        speaker: "Doktor",
+        text: "Ništa. Samo nemojte više piti kašičice!",
+        bg: "#18324b"
+      }
+    ],
+    bosna: [
+      {
+        speaker: "Komšija",
+        text: "Jesi li počeo da treniraš?",
+        bg: "#294d36"
+      },
+      {
+        speaker: "Mujo",
+        text: "Jesam, svaki dan!",
+        bg: "#315e42"
+      },
+      {
+        speaker: "Komšija",
+        text: "I kakvi su rezultati?",
+        bg: "#426b4b"
+      },
+      {
+        speaker: "Mujo",
+        text: "Odlično! Sad se umorim čim pomislim na trening!",
+        bg: "#254a34"
+      }
+    ],
+    motivation: [
+      {
+        speaker: "Glas",
+        text: "Ne moraš danas biti najbolji.",
+        bg: "#24335d"
+      },
+      {
+        speaker: "Glas",
+        text: "Dovoljno je da ne odustaneš.",
+        bg: "#344b78"
+      },
+      {
+        speaker: "Glas",
+        text: "Svaki veliki put počinje malim korakom.",
+        bg: "#263c69"
+      },
+      {
+        speaker: "Glas",
+        text: "Samo nastavi. Tvoja priča još traje!",
+        bg: "#1b2b50"
+      }
+    ],
+    story: [
+      {
+        speaker: "Pripovjedač",
+        text: "Jednog jutra, Mujo je pronašao misterioznu kutiju.",
+        bg: "#493b66"
+      },
+      {
+        speaker: "Mujo",
+        text: "Šta li se krije unutra?",
+        bg: "#574477"
+      },
+      {
+        speaker: "Pripovjedač",
+        text: "Otvorio je kutiju i ugledao poruku.",
+        bg: "#674c83"
+      },
+      {
+        speaker: "Mujo",
+        text: "Piše: Ne otvaraj ovu kutiju!",
+        bg: "#43345c"
+      }
+    ]
+  };
+
+  function setStatus(message) {
+    if (status) status.textContent = message;
   }
 
-  scenes = lines.map((x, i) => ({
-    title: x[0],
-    visual: x[1],
-    speaker: x[2],
-    text: x[3],
-    color: (seed + i * 73) % 360,
-    duration: Math.max(4, seconds / lines.length)
-  }));
+  function makeScenes() {
+    const selected = genre ? genre.value : "humor";
+    const prompt = idea ? idea.value.trim() : "";
+    let source = examples[selected] || examples.humor;
 
-  $("title").value = generatedTitle;
-  $("script").value = scenes.map(s => `${s.speaker}: ${s.text}`).join("\n");
-
-  renderSceneList();
-  $("storyPanel").hidden = false;
-  $("previewPanel").hidden = false;
-
-  currentScene = 0;
-  drawScene(0);
-  $("status").textContent = "Scenarij spreman";
-}
-
-function renderSceneList() {
-  $("sceneList").innerHTML = "";
-
-  scenes.forEach((s, i) => {
-    const d = document.createElement("div");
-    d.className = "scene";
-
-    const b = document.createElement("b");
-    b.textContent = `SCENA ${i + 1} · ${s.title}`;
-
-    const p = document.createElement("p");
-    p.textContent = s.visual;
-
-    d.append(b, p);
-    $("sceneList").append(d);
-  });
-}
-
-function readScript() {
-  const raw = $("script").value
-    .split("\n")
-    .map(x => x.trim())
-    .filter(Boolean);
-
-  raw.forEach((line, i) => {
-    const idx = line.indexOf(":");
-
-    if (idx > 0 && scenes[i]) {
-      scenes[i].speaker = line.slice(0, idx).trim();
-      scenes[i].text = line.slice(idx + 1).trim();
+    if (prompt) {
+      source = [
+        {
+          speaker: "Lik 1",
+          text: prompt,
+          bg: "#243b55"
+        },
+        {
+          speaker: "Lik 2",
+          text: "Čekaj malo, šta si upravo rekao?",
+          bg: "#385170"
+        },
+        {
+          speaker: "Lik 1",
+          text: "Pa upravo ono što si čuo!",
+          bg: "#293e56"
+        },
+        {
+          speaker: "Lik 2",
+          text: "E, ovo će se još dugo prepričavati!",
+          bg: "#18324b"
+        }
+      ];
     }
-  });
-}
 
-function drawScene(index) {
-  if (!scenes.length) return;
+    scenes = source.map((s, i) => ({
+      ...s,
+      number: i + 1
+    }));
 
-  currentScene = Math.max(0, Math.min(index, scenes.length - 1));
+    currentScene = 0;
 
-  const s = scenes[currentScene];
-  const w = canvas.width;
-  const h = canvas.height;
-  const hue = s.color;
+    if (titleBox) {
+      titleBox.value = prompt ? prompt.slice(0, 55) : "Balkanska priča";
+    }
 
-  const grad = ctx.createLinearGradient(0, 0, w, h);
-  grad.addColorStop(0, `hsl(${hue},48%,25%)`);
-  grad.addColorStop(1, `hsl(${(hue + 65) % 360},55%,11%)`);
+    if (scriptBox) {
+      scriptBox.value = scenes
+        .map(s => s.speaker + ": " + s.text)
+        .join("\n\n");
+    }
 
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, w, h);
+    renderSceneList();
+    drawScene(0);
+    setStatus("Video je napravljen! Sada možeš pokrenuti pregled.");
+  }
 
-  ctx.fillStyle = "rgba(255,255,255,.06)";
-  ctx.beginPath();
-  ctx.arc(w * .5, h * .24, 150, 0, Math.PI * 2);
-  ctx.fill();
+  function renderSceneList() {
+    if (!sceneList) return;
 
-  ctx.fillStyle = "#dce4ff";
-  ctx.font = "bold 15px system-ui";
-  ctx.textAlign = "left";
-  ctx.fillText(`SCENA ${index + 1}/${scenes.length}`, 24, 38);
+    sceneList.innerHTML = "";
 
-  const bounce = playing ? Math.sin(Date.now() / 220) * 5 : 0;
+    scenes.forEach((scene, index) => {
+      const item = document.createElement("div");
+      item.className = "scene";
+      item.textContent =
+        "Scena " + (index + 1) + " — " +
+        scene.speaker + ": " + scene.text;
 
-  drawPerson(w * .32, h * .48 + bounce, "#f3c89d", hue);
-  drawPerson(w * .68, h * .48 - bounce, "#d8a77f", (hue + 110) % 360);
+      item.addEventListener("click", () => {
+        stopPreview();
+        currentScene = index;
+        drawScene(index);
+        setStatus("Prikazana scena " + (index + 1));
+      });
 
-  ctx.fillStyle = "rgba(8,12,24,.55)";
-  roundRect(18, h * .68, w - 36, h * .25, 18);
-  ctx.fill();
+      sceneList.appendChild(item);
+    });
+  }
 
-  ctx.fillStyle = "#fff";
-  ctx.textAlign = "center";
-  ctx.font = "bold 21px system-ui";
-  wrapText(s.title, w / 2, h * .73, w - 60, 26, 2);
+  function roundedRect(x, y, w, h, r, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+    ctx.fill();
+  }
 
-  ctx.font = "16px system-ui";
-  ctx.fillStyle = "#dbe2f7";
-  wrapText(s.visual, w / 2, h * .79, w - 58, 22, 3);
+  function drawCharacter(x, y, color, name, flip = false) {
+    ctx.save();
+    if (flip) {
+      ctx.translate(x * 2, 0);
+      ctx.scale(-1, 1);
+    }
 
-  if ($("captions").checked) {
-    ctx.fillStyle = "rgba(0,0,0,.72)";
-    roundRect(15, h - 112, w - 30, 82, 12);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, 95, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 21px system-ui";
-    wrapText(s.text, w / 2, h - 82, w - 52, 26, 2);
+    ctx.fillStyle = "#f3c9a5";
+    ctx.beginPath();
+    ctx.arc(x, y - 20, 63, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#30251e";
+    ctx.beginPath();
+    ctx.arc(x - 23, y - 35, 8, 0, Math.PI * 2);
+    ctx.arc(x + 23, y - 35, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#603b32";
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.arc(x, y + 4, 23, 0.15, Math.PI - 0.15);
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 30px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(name, x, y + 135);
+
+    ctx.restore();
   }
 
-  ctx.fillStyle = "#b9c7ff";
-  ctx.font = "bold 13px system-ui";
-  ctx.fillText($("title").value || generatedTitle, w / 2, h - 18);
-}
-
-function drawPerson(x, y, skin, hue) {
-  ctx.save();
-  ctx.translate(x, y);
-
-  ctx.fillStyle = `hsl(${hue},55%,58%)`;
-  roundRect(-43, 35, 86, 112, 26);
-  ctx.fill();
-
-  ctx.fillStyle = skin;
-  ctx.beginPath();
-  ctx.arc(0, 0, 39, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "#252b38";
-  ctx.beginPath();
-  ctx.arc(-14, -5, 4, 0, Math.PI * 2);
-  ctx.arc(14, -5, 4, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.strokeStyle = "#713f3a";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.arc(0, 9, 13, .15, Math.PI - .15);
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-function roundRect(x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, r);
-}
-
-function wrapText(text, x, y, maxWidth, lineHeight, maxLines = 3) {
-  const words = String(text).split(/\s+/);
-  let line = "";
-  let lines = [];
-
-  for (const word of words) {
-    const test = line ? line + " " + word : word;
-
-    if (ctx.measureText(test).width > maxWidth && line) {
-      lines.push(line);
-      line = word;
-    } else {
-      line = test;
-    }
-  }
-
-  if (line) lines.push(line);
-
-  lines = lines.slice(0, maxLines);
-
-  lines.forEach((l, i) => {
-    ctx.fillText(l, x, y + i * lineHeight);
-  });
-}
-
-function speakScene(s) {
-  if (!$("voiceOn").checked || !("speechSynthesis" in window)) return;
-
-  speechSynthesis.cancel();
-
-  const u = new SpeechSynthesisUtterance(`${s.speaker}. ${s.text}`);
-  u.lang = "sr-RS";
-  u.rate = 0.94;
-
-  const voices = speechSynthesis.getVoices();
-  const candidates = voices.filter(v =>
-    /sr|hr|bs|ba|me/i.test(v.lang + " " + v.name)
-  );
-
-  if (candidates.length) {
-    u.voice = candidates[0];
-  }
-
-  speechSynthesis.speak(u);
-}
-
-function stopPreview() {
-  playing = false;
-  clearTimeout(playTimer);
-
-  if ("speechSynthesis" in window) {
-    speechSynthesis.cancel();
-  }
-
-  drawScene(currentScene);
-  $("status").textContent = "Zaustavljeno";
-}
-
-function previewNext() {
-  if (!playing) return;
-
-  if (currentScene >= scenes.length) {
-    stopPreview();
-    return;
-  }
-
-  const s = scenes[currentScene];
-
-  drawScene(currentScene);
-  speakScene(s);
-
-  $("status").textContent = `Scena ${currentScene + 1} od ${scenes.length}`;
-
-  playTimer = setTimeout(() => {
-    currentScene++;
-    previewNext();
-  }, s.duration * 1000);
-}
-
-function startPreview() {
-  if (!scenes.length) return;
-
-  stopPreview();
-  playing = true;
-  currentScene = 0;
-  previewNext();
-}
-
-function setFormat() {
-  const f = $("format").value;
-
-  if (f === "square") {
-    canvas.width = 600;
-    canvas.height = 600;
-  } else if (f === "landscape") {
-    canvas.width = 960;
-    canvas.height = 540;
-  } else {
-    canvas.width = 360;
-    canvas.height = 640;
-  }
-
-  drawScene(currentScene);
-}
-
-function makeMusic(audioContext, destination) {
-  if (!$("musicOn").checked) return null;
-
-  const osc = audioContext.createOscillator();
-  const gain = audioContext.createGain();
-
-  osc.type = "sine";
-  osc.frequency.value = 110;
-  gain.gain.value = 0.025;
-
-  osc.connect(gain);
-  gain.connect(destination);
-  osc.start();
-
-  return osc;
-}
-
-async function exportVideo() {
-  if (!scenes.length) return;
-
-  stopPreview();
-  readScript();
-  setFormat();
-
-  if (!canvas.captureStream || !window.MediaRecorder) {
-    $("exportMessage").textContent =
-      "Ovaj preglednik ne podržava snimanje videa. Probaj noviji Chrome.";
-    return;
-  }
-
-  const stream = canvas.captureStream(30);
-  let audioContext = null;
-  let oscillator = null;
-
-  try {
-    if ($("musicOn").checked && window.AudioContext) {
-      audioContext = new AudioContext();
-
-      const destination = audioContext.createMediaStreamDestination();
-      oscillator = makeMusic(audioContext, destination);
-
-      destination.stream.getAudioTracks().forEach(track => {
-        stream.addTrack(track);
-      });
+  function drawScene(index) {
+    if (!scenes.length) {
+      ctx.fillStyle = "#18243a";
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "white";
+      ctx.textAlign = "center";
+      ctx.font = "bold 42px Arial";
+      ctx.fillText("DOBAR VIDEO", W / 2, H / 2);
+      ctx.font = "28px Arial";
+      ctx.fillText("Pritisni Napravi video", W / 2, H / 2 + 60);
+      return;
     }
 
-    const mime = [
-      "video/webm;codecs=vp9,opus",
-      "video/webm;codecs=vp8,opus",
-      "video/webm"
-    ].find(type => MediaRecorder.isTypeSupported(type));
+    const scene = scenes[index];
 
-    const recorder = new MediaRecorder(
-      stream,
-      mime ? { mimeType: mime } : undefined
-    );
+    ctx.fillStyle = scene.bg;
+    ctx.fillRect(0, 0, W, H);
 
-    const chunks = [];
+    ctx.fillStyle = "rgba(255,255,255,0.08)";
+    for (let i = 0; i < 8; i++) {
+      ctx.beginPath();
+      ctx.arc(i * 110, 180 + (i % 2) * 100, 55, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
-    recorder.ondataavailable = event => {
-      if (event.data.size) chunks.push(event.data);
-    };
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.font = "bold 42px Arial";
+    ctx.fillText(titleBox && titleBox.value ? titleBox.value : "DOBAR VIDEO", W / 2, 105);
 
-    const stopped = new Promise(resolve => {
-      recorder.onstop = resolve;
+    drawCharacter(225, 480, "#e6a23c", "MUJO");
+    drawCharacter(495, 480, "#4b9cce", "HASO", true);
+
+    roundedRect(45, 760, 630, 285, 28, "#ffffff");
+
+    ctx.fillStyle = "#172033";
+    ctx.textAlign = "center";
+    ctx.font = "bold 35px Arial";
+    ctx.fillText(scene.speaker, W / 2, 820);
+
+    ctx.font = "31px Arial";
+    const words = scene.text.split(" ");
+    let line = "";
+    let y = 890;
+
+    words.forEach(word => {
+      const test = line + word + " ";
+      if (ctx.measureText(test).width > 550 && line) {
+        ctx.fillText(line.trim(), W / 2, y);
+        line = word + " ";
+        y += 48;
+      } else {
+        line = test;
+      }
     });
 
-    recorder.start(250);
+    if (line) ctx.fillText(line.trim(), W / 2, y);
 
-    $("exportBtn").disabled = true;
-    $("exportMessage").textContent = "Izvoz u toku…";
-    $("progressBar").style.width = "0%";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "26px Arial";
+    ctx.fillText(
+      "SCENA " + (index + 1) + " / " + scenes.length,
+      W / 2,
+      1170
+    );
 
-    const total = scenes.reduce((n, s) => n + s.duration, 0);
-    const start = Date.now();
+    ctx.font = "bold 30px Arial";
+    ctx.fillText("DOBAR VIDEO – AI STUDIO", W / 2, 1230);
+  }
 
-    for (let i = 0; i < scenes.length; i++) {
-      const s = scenes[i];
-      const began = Date.now();
+  function speak(text) {
+    if (!("speechSynthesis" in window)) return;
 
-      drawScene(i);
+    window.speechSynthesis.cancel();
 
-      if ($("voiceOn").checked && "speechSynthesis" in window) {
-        const u = new SpeechSynthesisUtterance(`${s.speaker}. ${s.text}`);
-        u.lang = "sr-RS";
-        u.rate = 0.94;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "sr-RS";
+    utterance.rate = 0.92;
+    utterance.pitch = 1;
 
-        const voices = speechSynthesis.getVoices();
-        const voice = voices.find(v =>
-          /sr|hr|bs|ba|me/i.test(v.lang + " " + v.name)
-        );
+    window.speechSynthesis.speak(utterance);
+  }
 
-        if (voice) u.voice = voice;
-
-        speechSynthesis.speak(u);
-      }
-
-      while (Date.now() - began < s.duration * 1000) {
-        const progress = Math.min(
-          100,
-          ((Date.now() - start) / 1000) / total * 100
-        );
-
-        $("progressBar").style.width = progress + "%";
-
-        await new Promise(resolve => setTimeout(resolve, 80));
-      }
-    }
+  function stopPreview() {
+    playing = false;
+    clearTimeout(animationTimer);
 
     if ("speechSynthesis" in window) {
-      speechSynthesis.cancel();
+      window.speechSynthesis.cancel();
     }
 
-    recorder.stop();
-    await stopped;
-
-    const blob = new Blob(chunks, { type: "video/webm" });
-    const url = URL.createObjectURL(blob);
-
-    const link = $("download");
-    link.href = url;
-    link.download = "dobar-video.webm";
-    link.hidden = false;
-    link.textContent = "⬇ Preuzmi gotov video";
-
-    $("progressBar").style.width = "100%";
-    $("exportMessage").textContent =
-      "Gotovo! Video je spreman za preuzimanje.";
-
-  } catch (error) {
-    $("exportMessage").textContent =
-      "Izvoz nije uspio: " + error.message;
-  } finally {
-    $("exportBtn").disabled = false;
-
-    if (oscillator) {
-      try { oscillator.stop(); } catch (e) {}
-    }
-
-    if (audioContext) {
-      try { await audioContext.close(); } catch (e) {}
-    }
-
-    stream.getTracks().forEach(track => track.stop());
+    if (previewBtn) previewBtn.disabled = false;
+    setStatus("Pregled je zaustavljen.");
   }
-}
 
-$("createBtn").addEventListener("click", makeStory);
-$("regenerateBtn").addEventListener("click", makeStory);
-$("previewBtn").addEventListener("click", startPreview);
-$("stopBtn").addEventListener("click", stopPreview);
-$("exportBtn").addEventListener("click", exportVideo);
+  function playPreview() {
+    if (!scenes.length) {
+      makeScenes();
+    }
 
-$("captions").addEventListener("change", () => {
-  drawScene(currentScene);
-});
+    stopPreview();
+    playing = true;
+    currentScene = 0;
 
-$("title").addEventListener("input", () => {
-  drawScene(currentScene);
-});
+    if (previewBtn) previewBtn.disabled = true;
 
-$("format").addEventListener("change", setFormat);
+    function next() {
+      if (!playing) return;
 
-$("script").addEventListener("input", () => {
-  readScript();
-  drawScene(currentScene);
-});
+      const scene = scenes[currentScene];
+      drawScene(currentScene);
 
-if ("speechSynthesis" in window) {
-  speechSynthesis.getVoices();
-}
+      const voiceOn = $("voiceOn");
+      if (!voiceOn || voiceOn.checked) {
+        speak(scene.speaker + ". " + scene.text);
+      }
 
-makeStory();
+      setStatus("Pregled scene " + (currentScene + 1));
+
+      currentScene++;
+
+      if (currentScene >= scenes.length) {
+        animationTimer = setTimeout(() => {
+          stopPreview();
+          currentScene = 0;
+          drawScene(0);
+          setStatus("Pregled je završen.");
+        }, 4500);
+      } else {
+        animationTimer = setTimeout(next, 4500);
+      }
+    }
+
+    next();
+  }
+
+  function createTone() {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return null;
+
+    audioContext = new AudioCtx();
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = 110;
+    gain.gain.value = 0.025;
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start();
+
+    return {
+      stop: () => {
+        try {
+          oscillator.stop();
+          audioContext.close();
+        } catch (e) {}
+      }
+    };
+  }
+
+  async function exportVideo() {
+    if (!scenes.length) makeScenes();
+
+    if (!canvas.captureStream || !window.MediaRecorder) {
+      setStatus("Ovaj preglednik ne podržava izvoz videa.");
+      return;
+    }
+
+    stopPreview();
+
+    const stream = canvas.captureStream(25);
+    recordedChunks = [];
+
+    let tone = null;
+    const musicOn = $("musicOn");
+
+    if (musicOn && musicOn.checked) {
+      tone = createTone();
+    }
+
+    let options = {};
+    if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
+      options.mimeType = "video/webm;codecs=vp9";
+    } else if (MediaRecorder.isTypeSupported("video/webm")) {
+      options.mimeType = "video/webm";
+    }
+
+    try {
+      recorder = new MediaRecorder(stream, options);
+    } catch (error) {
+      setStatus("Ne mogu pokrenuti izvoz na ovom uređaju.");
+      if (tone) tone.stop();
+      return;
+    }
+
+    recorder.ondataavailable = event => {
+      if (event.data && event.data.size > 0) {
+        recordedChunks.push(event.data);
+      }
+    };
+
+    recorder.onstop = () => {
+      if (tone) tone.stop();
+
+      const blob = new Blob(recordedChunks, { type: "video/webm" });
+      const url = URL.createObjectURL(blob);
+
+      if (download) {
+        download.href = url;
+        download.download = "dobar-video.webm";
+        download.textContent = "Preuzmi gotov video";
+        download.style.display = "inline-block";
+      }
+
+      setStatus("Video je spreman! Pritisni Preuzmi gotov video.");
+      if (progressBar) progressBar.style.width = "100%";
+    };
+
+    recorder.start();
+
+    let index = 0;
+    const total = scenes.length;
+
+    function recordNext() {
+      drawScene(index);
+
+      if (progressBar) {
+        progressBar.style.width =
+          Math.round(((index + 1) / total) * 100) + "%";
+      }
+
+      index++;
+
+      if (index < total) {
+        setTimeout(recordNext, 3500);
+      } else {
+        setTimeout(() => {
+          if (recorder && recorder.state !== "inactive") {
+            recorder.stop();
+          }
+        }, 3500);
+      }
+    }
+
+    setStatus("Izvoz videa je u toku...");
+    recordNext();
+  }
+
+  if (createBtn) {
+    createBtn.addEventListener("click", event => {
+      event.preventDefault();
+      try {
+        makeScenes();
+      } catch (error) {
+        console.error(error);
+        setStatus("Greška pri pravljenju videa. Osvježi stranicu.");
+      }
+    });
+  }
+
+  if (previewBtn) {
+    previewBtn.addEventListener("click", event => {
+      event.preventDefault();
+      playPreview();
+    });
+  }
+
+  if (stopBtn) {
+    stopBtn.addEventListener("click", event => {
+      event.preventDefault();
+      stopPreview();
+    });
+  }
+
+  if (exportBtn) {
+    exportBtn.addEventListener("click", event => {
+      event.preventDefault();
+      exportVideo();
+    });
+  }
+
+  drawScene(0);
+  setStatus("Spreman za pravljenje videa. Unesi ideju i pritisni dugme!");
+
+})();

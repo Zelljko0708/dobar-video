@@ -3,44 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#101010">
+    <meta name="theme-color" content="#101522">
     <title>DOBAR VIDEO – Studio za sve</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>🎬 DOBAR VIDEO</h1>
-        <p>Studio za sve – besplatno!</p>
+
+    <header class="topbar">
+        <div class="brand-mark">▶</div>
+        <div>
+            <h1>DOBAR VIDEO</h1>
+            <p>Studio za sve · besplatno stvaranje</p>
+        </div>
     </header>
 
     <main>
-        <section>
-            <h2>Izaberi svoj video</h2>
-            <input type="file" id="videoFile" accept="video/*">
 
-            <div id="videoContainer" style="position:relative; width:100%; overflow:hidden;">
-                <video id="video" controls playsinline style="display:none; width:100%;"></video>
-
-                <div id="videoText" style="position:absolute; top:25px; left:5%; right:5%; z-index:10; color:white; font-size:26px; font-weight:bold; text-align:center; text-shadow:2px 2px 4px black; pointer-events:auto; touch-action:none; cursor:move;"></div>
+        <section class="panel">
+            <div class="section-heading">
+                <span class="step">1</span>
+                <div>
+                    <h2>Izaberi video</h2>
+                    <p>Učitaj video iz galerije telefona.</p>
+                </div>
             </div>
 
-            <h2>Dodaj tekst preko videa</h2>
-            <textarea id="caption" placeholder="Napiši nešto smiješno..."></textarea>
+            <label class="file-button" for="videoFile">＋ Izaberi video</label>
+            <input id="videoFile" type="file" accept="video/*">
 
-            <h3>Veličina teksta</h3>
-            <input type="range" id="textSize" min="16" max="60" value="26">
+            <div class="preview-wrap" id="previewWrap">
+                <video id="video" playsinline controls></video>
+                <div id="videoText" class="video-text"></div>
+                <div id="subtitlePreview" class="subtitle-preview"></div>
 
-            <h3>Boja teksta</h3>
-            <input type="color" id="textColor" value="#ffffff">
+                <div id="emptyPreview" class="empty-preview">
+                    <span>▶</span>
+                    <b>Pregled videa</b>
+                    <small>Ovdje će se prikazati tvoj video</small>
+                </div>
+            </div>
 
-            <button id="resetText">↩ Vrati tekst na početak</button>
+            <div class="status" id="videoStatus">
+                Još nije izabran video.
+            </div>
         </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <span class="step">2</span>
+                <div>
+                    <h2>Tekst na videu</h2>
+                    <p>Napiši poruku i namjesti njen izgled.</p>
+                </div>
+            </div>
+
+            <label for="caption">Tvoj tekst</label>
+            <textarea id="caption" rows="2" placeholder="Napiši nešto smiješno..."></textarea>
+
+            <div class="two-col">
+                <div>
+                    <label for="textSize">Veličina teksta <b id="sizeValue">28 px</b></label>
+                    <input id="textSize" type="range" min="14" max="64" value="28">
+                </div>
+
+                <div>
+                    <label for="textColor">Boja teksta</label>
+                    <input id="textColor" type="color" value="#ffffff">
+                </div>
+            </div>
+
+            <button class="secondary full" id="resetText">
+                ↺ Vrati tekst na početak
+            </button>
+
+            <p class="hint">
+                Tekst možeš pomjerati prstom direktno preko pregleda videa.
+            </p>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <span class="step">3</span>
+                <div>
+                    <h2>Skraćivanje videa</h2>
+                    <p>Odredi gdje video počinje i gdje završava.</p>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div>
+                    <label for="trimStart">Početak (sekunde)</label>
+                    <input id="trimStart" type="number" min="0" step="0.1" value="0">
+                </div>
+
+                <div>
+                    <label for="trimEnd">Kraj (sekunde)</label>
+                    <input id="trimEnd" type="number" min="0" step="0.1" placeholder="Kraj videa">
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button class="secondary" id="previewTrim">▶ Pregled izabranog dijela</button>
+                <button class="secondary" id="resetTrim">Vrati cijeli video</button>
+            </div>
+
+            <p class="hint" id="durationInfo">
+                Trajanje će se prikazati nakon učitavanja videa.
+            </p>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <span class="step">4</span>
+                <div>
+                    <h2>Dodaj muziku</h2>
+                    <p>Ubaci svoju audio datoteku sa telefona.</p>
+                </div>
+            </div>
+
+            <label class="file-button" for="musicFile">♫ Izaberi muziku</label>
+            <input id="musicFile" type="file" accept="audio/*">
+
+            <div class="status" id="musicStatus">
+                Muzika nije dodana.
+            </div>
+
+            <label for="videoVolume">Jačina zvuka videa <b id="videoVolumeValue">100%</b></label>
+            <input id="videoVolume" type="range" min="0" max="100" value="100">
+
+            <label for="musicVolume">Jačina muzike <b id="musicVolumeValue">50%</b></label>
+            <input id="musicVolume" type="range" min="0" max="100" value="50">
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <span class="step">5</span>
+                <div>
+                    <h2>Podnaslov</h2>
+                    <p>Dodaj tekst koji će se prikazivati pri dnu videa.</p>
+                </div>
+            </div>
+
+            <textarea id="subtitleText" rows="2" placeholder="Ovdje upiši podnaslov..."></textarea>
+
+            <p class="hint">
+                Ovo je ručno dodan podnaslov, nije automatsko prepoznavanje govora.
+            </p>
+        </section>
+
+        <section class="panel export-panel">
+            <div class="section-heading">
+                <span class="step">6</span>
+                <div>
+                    <h2>Sačuvaj svoj video</h2>
+                    <p>Izvezi obrađeni video kao WebM datoteku.</p>
+                </div>
+            </div>
+
+            <button class="primary full" id="exportButton" disabled>
+                ⬇ Izvezi video
+            </button>
+
+            <div class="progress-track">
+                <div id="progressBar"></div>
+            </div>
+
+            <div class="status" id="exportStatus">
+                Prvo izaberi video.
+            </div>
+
+            <a id="downloadLink" class="download-link" hidden>
+                Preuzmi gotov video
+            </a>
+
+            <p class="hint">
+                Izvoz se obavlja na tvom uređaju. Za izvoz koristi Chrome.
+                Podrška za WebM zavisi od telefona i preglednika.
+            </p>
+        </section>
+
     </main>
 
     <footer>
-        <p>Napravljen za sve koji vole stvarati. ❤️</p>
+        DOBAR VIDEO · Napravljen za sve koji vole stvarati ❤️
     </footer>
 
     <script src="app.js"></script>
+
 </body>
 </html>

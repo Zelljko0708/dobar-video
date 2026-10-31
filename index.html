@@ -1,3 +1,5 @@
+
+HTML
 <!DOCTYPE html>
 <html lang="bs">
 <head>
@@ -15,31 +17,3 @@
         <h1>🎬 DOBAR VIDEO</h1>
         <p>Studio za sve – besplatno!</p>
     </header>
-
-    <main>
-        <section>
-            <h2>Izaberi svoj video</h2>
-            <input type="file" id="videoFile" accept="video/*">
-
-            <video id="video" controls playsinline style="display:none;"></video>
-
-            <h2>Dodaj tekst</h2>
-            <textarea id="caption" placeholder="Napiši nešto smiješno..."></textarea>
-            <div id="videoText"></div>
-        </section>
-    </main>
-
-    <footer>
-        <p>Napravljen za sve koji vole stvarati. ❤️</p>
-    </footer>
-
-    <script src="app.js"></script>
-    <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", () => {
-                navigator.serviceWorker.register("./sw.js");
-            });
-        }
-    </script>
-</body>
-</html>

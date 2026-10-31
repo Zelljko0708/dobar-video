@@ -63,10 +63,11 @@ video {
 }
 
 #videoText {
+    #videoText {
     position: absolute;
     left: 5%;
     right: 5%;
-    bottom: 65px;
+    top: 25px;
     color: white;
     font-size: 26px;
     font-weight: bold;
@@ -74,6 +75,7 @@ video {
     text-shadow: 2px 2px 4px black;
     pointer-events: none;
     overflow-wrap: anywhere;
+}
 }
 
 footer {

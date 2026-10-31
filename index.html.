@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101522">
+<title>DOBAR VIDEO</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+<h1>▶ DOBAR VIDEO</h1>
+<p>Studio za sve ❤️</p>
+</header>
+
+<main>
+<h2>Tvoja ideja. Tvoj video.</h2>
+<p>Besplatni studio za stvaranje videa.</p>
+
+<section>
+<h3>1. Izaberi video</h3>
+<input type="file" id="videoFile" accept="video/*">
+</section>
+
+<section>
+<h3>2. Pregled videa</h3>
+<video id="video" controls playsinline></video>
+</section>
+
+<section>
+<h3>3. Dodaj tekst</h3>
+<input type="text" id="caption" placeholder="Napiši nešto smiješno...">
+</section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
